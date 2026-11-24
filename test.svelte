@@ -1,1 +1,1 @@
-<!-- GENERATE a svelte login page -->
+<!-- GENERATE a svelte login page use svelte 5-->

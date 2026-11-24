@@ -11,26 +11,35 @@ import (
 	"time"
 
 	"github.com/sgtdi/fswatcher/v2"
-	"google.golang.org/adk/v2/model/gemini"
 	"google.golang.org/adk/v2/runner"
 	"google.golang.org/adk/v2/session"
-	"google.golang.org/genai"
+
+	"google.golang.org/adk/v2/model/openaimodel"
 )
 
 // Model to be used
-const MODEL_NAME = "gemma-4-31b-it"
+const MODEL_NAME = "gemma-4-26b-a4b-it"
+const BASE_URL = "http://127.0.0.1:8081"
 
 // Main Entrypoint
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	// 1. Initialize Gemini model (uses GEMINI_API_KEY from environment)
-	m, err := gemini.NewModel(ctx, MODEL_NAME, &genai.ClientConfig{
-		APIKey: os.Getenv("GOOGLE_API_KEY"),
+	// // 1. Initialize Gemini model (uses GEMINI_API_KEY from environment)
+	// m, err := gemini.NewModel(ctx, MODEL_NAME, &genai.ClientConfig{
+	// 	APIKey: os.Getenv("GOOGLE_API_KEY"),
+	// })
+	// if err != nil {
+	// 	log.Fatalf("Failed to create Gemini model: %v", err)
+	// }
+
+	// 1. Initialize OpenAI model (uses OPENAI_API_KEY from environment)
+	m, err := openaimodel.NewModel(ctx, MODEL_NAME, &openaimodel.ClientConfig{
+		BaseURL: BASE_URL,
 	})
 	if err != nil {
-		log.Fatalf("Failed to create Gemini model: %v", err)
+		log.Fatalf("Failed to create OpenAI model: %v", err)
 	}
 
 	// 2. Build the ADK LoopAgent workflow

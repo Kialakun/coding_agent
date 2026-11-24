@@ -46,6 +46,13 @@ func processFileChange(
 		genai.RoleUser,
 	)
 
+	// Create (or overwrite) the output file before streaming starts
+	f, err := os.Create(filePath + ".ai")
+	if err != nil {
+		log.Fatalf("failed to create output file: %v", err)
+	}
+	defer f.Close()
+
 	// Stream events from the LoopAgent
 	for ev, err := range r.Run(ctx, userID, sessionID, prompt, agent.RunConfig{}) {
 		if err != nil {
@@ -56,15 +63,18 @@ func processFileChange(
 			continue
 		}
 
-		// Print progress from each sub-agent
+		// Write progress from each sub-agent to the file
 		if ev.Content != nil {
 			for _, part := range ev.Content.Parts {
 				if part.Text != "" {
-					fmt.Printf("\n--- [%s] ---\n%s\n", ev.Author, part.Text)
+					if _, err := fmt.Fprintf(f, "\n--- [%s] ---\n%s\n", ev.Author, part.Text); err != nil {
+						log.Printf("[File Write Error] %v\n", err)
+					}
 				}
 			}
 		}
 	}
+
 }
 
 func isRelevantSourceFile(path string) bool {
